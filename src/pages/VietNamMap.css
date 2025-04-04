@@ -1,0 +1,9 @@
+.leaflet-container {
+    width: 100%;
+    height: calc(100vh - 60px);
+    z-index: 1;
+}
+
+.leaflet-control {
+    display: none;
+}

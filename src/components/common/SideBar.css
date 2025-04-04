@@ -1,0 +1,35 @@
+.sidebar {
+  position: fixed;
+  top: 56px;
+  left: -280px;
+  width: 280px;
+  height: calc(100% - 56px);
+  background-color: #f8f9fa;
+  transition: all 0.3s;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  z-index: 1020;
+  overflow-y: auto;
+  padding-top: 10px;
+}
+
+.sidebar.active {
+  left: 0;
+}
+
+.sidebar-item {
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  color: #495057;
+  transition: all 0.3s;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.sidebar-item:hover {
+  background-color: #f8f9fa;
+  cursor: pointer;
+}
+
+.sidebar-item .material-icons {
+  margin-right: 15px;
+}

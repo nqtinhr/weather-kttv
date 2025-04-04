@@ -1,0 +1,69 @@
+#toggle-btn {
+  position: absolute;
+  top: 40%;
+  left: 20px;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 12px 15px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+  z-index: 10;
+}
+
+#toggle-btn.hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%); /* Đưa button ra ngoài khi ẩn */
+}
+
+#toggle-btn i {
+  font-size: 20px;
+  color: #333;
+}
+
+.filter-form {
+  width: 300px;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 20px;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  top: 50%;
+  left: -100%;
+  transform: translateY(-50%);
+  border-radius: 15px;
+  z-index: 5;
+  transition: left 0.3s ease, opacity 0.3s ease;
+}
+
+.filter-form.active {
+  left: 0;
+  opacity: 1;
+}
+
+#close-btn {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  color: #333;
+}
+
+#close-btn:hover {
+  color: #d9534f; /* Thêm hiệu ứng hover */
+}
+
+.select-box {
+  margin-bottom: 10px;
+}
+
+/* Khi form có lớp "hidden", ẩn hoàn toàn form */
+.filter-form.hidden {
+  opacity: 0;
+  visibility: hidden;
+  transition: left 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
+}

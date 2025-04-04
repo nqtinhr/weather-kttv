@@ -1,0 +1,33 @@
+.navbar-custom {
+    position: sticky;
+    top: 0;
+    background-color: #4267b2;
+    z-index: 10000;
+    padding: 10px 15px;
+    width: 100%;
+}
+
+.navbar-brand {
+    color: white;
+    font-weight: bold;
+}
+
+.navbar-brand:hover {
+    color: #ddd;
+}
+
+.nav-link {
+    color: white;
+}
+
+.nav-link:hover {
+    color: #ddd;
+}
+
+.toggle-icons {
+    background: none;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+}
