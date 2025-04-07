@@ -1,22 +1,20 @@
 import { FormFilter } from '@/components/common/FormFilter'
-import { GeoJsonLoader } from '@/components/common/GeoJsonLoader'
 import { MapMenu } from '@/components/common/MapMenu'
-import { Slider } from '@/components/common/Slider'
-import COUNTRIES from '@/data/countries.json'
-import PROVINCE from '@/data/province.json'
-import L from 'leaflet'
+// import COUNTRIES from '@/data/countries.json'
+// import PROVINCE from '@/data/province.json'
+import { RainMap } from '@/components/map/RainMap'
+import {latLng, latLngBounds} from 'leaflet'
 import { useEffect } from 'react'
 import { CircleMarker, MapContainer, TileLayer, Tooltip, useMap } from 'react-leaflet'
 import './VietNamMap.css'
-import { RainMap } from '@/components/map/RainMap'
 
 const MapSetup = () => {
   const map = useMap()
 
   useEffect(() => {
-    const southWest = L.latLng(2.024354, 100.069445)
-    const northEast = L.latLng(27.146849, 117.249689)
-    L.latLngBounds(southWest, northEast)
+    const southWest = latLng(2.024354, 100.069445)
+    const northEast = latLng(27.146849, 117.249689)
+    latLngBounds(southWest, northEast)
 
     map.setView([16.0476, 108.2069], 6)
   }, [map])
@@ -32,8 +30,8 @@ export const VietNamMap = () => {
       <MapContainer center={[17.083098, 104.171154]} zoom={10}>
         <TileLayer url={mbUrl} />
 
-        <GeoJsonLoader json={COUNTRIES} color='#ffffff' />
-        <GeoJsonLoader json={PROVINCE} color='#ffffff' />
+        {/* <GeoJsonLoader json={COUNTRIES} color='#ffffff' /> */}
+        {/* <GeoJsonLoader json={PROVINCE} color='#ffffff' /> */}
 
         <RainMap/>
 
@@ -52,7 +50,6 @@ export const VietNamMap = () => {
       </MapContainer>
       <FormFilter />
       <MapMenu />
-      <Slider />
     </div>
   )
 }
