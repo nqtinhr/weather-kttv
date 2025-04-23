@@ -3,10 +3,12 @@ import { MapMenu } from '@/components/common/MapMenu'
 // import COUNTRIES from '@/data/countries.json'
 // import PROVINCE from '@/data/province.json'
 import { RainMap } from '@/components/map/RainMap'
-import {latLng, latLngBounds} from 'leaflet'
-import { useEffect } from 'react'
+import { latLng, latLngBounds } from 'leaflet'
+import { useEffect, useState } from 'react'
 import { CircleMarker, MapContainer, TileLayer, Tooltip, useMap } from 'react-leaflet'
 import './VietNamMap.css'
+import { Slider } from '@/components/common/Slider'
+import { getInitialHour } from '@/utils/helper'
 
 const MapSetup = () => {
   const map = useMap()
@@ -24,6 +26,7 @@ const MapSetup = () => {
 
 export const VietNamMap = () => {
   const mbUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+  const [currentHourIndex, setCurrentHourIndex] = useState(getInitialHour)
 
   return (
     <div className='content'>
@@ -33,7 +36,7 @@ export const VietNamMap = () => {
         {/* <GeoJsonLoader json={COUNTRIES} color='#ffffff' /> */}
         {/* <GeoJsonLoader json={PROVINCE} color='#ffffff' /> */}
 
-        <RainMap/>
+        <RainMap currentHourIndex={currentHourIndex} />
 
         <CircleMarker center={[10.335675, 112.740167]} pathOptions={{ fillColor: '#A3CCFF', radius: 0.01 }}>
           <Tooltip direction='bottom' permanent>
@@ -50,6 +53,7 @@ export const VietNamMap = () => {
       </MapContainer>
       <FormFilter />
       <MapMenu />
+      <Slider currentHourIndex={currentHourIndex} setCurrentHourIndex={setCurrentHourIndex} />
     </div>
   )
 }

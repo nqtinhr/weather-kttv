@@ -1,15 +1,88 @@
-import "./Slider.css";
-import React from 'react'
+import './Slider.css'
+import { useEffect, useRef, useState } from 'react'
 
-export const Slider = () => {
+export const Slider = ({ currentHourIndex, setCurrentHourIndex }) => {
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [sliderValue, setSliderValue] = useState(currentHourIndex)
+
+  const intervalRef = useRef(null)
+  const sliderRef = useRef(null)
+  const tooltipRef = useRef(null)
+
+  const togglePlayPause = () => setIsPlaying(prev => !prev)
+
+  const updateTooltipPosition = (value) => {
+    const slider = sliderRef.current
+    const tooltip = tooltipRef.current
+    if (!slider || !tooltip) return
+
+    tooltip.textContent = value < 10 ? `0${value}:00` : `${value}:00`
+
+    const min = parseInt(slider.min)
+    const max = parseInt(slider.max)
+    const rangeWidth = slider.offsetWidth
+    const thumbWidth = 16
+    const percentage = (value - min) / (max - min)
+    const tooltipOffset = (rangeWidth - thumbWidth) * percentage + thumbWidth / 2
+
+    tooltip.style.left = `${tooltipOffset}px`
+  }
+
+  useEffect(() => {
+    setSliderValue(currentHourIndex)
+  }, [currentHourIndex])
+
+  useEffect(() => {
+    updateTooltipPosition(sliderValue)
+  }, [sliderValue])
+
+  useEffect(() => {
+    if (isPlaying) {
+      intervalRef.current = setInterval(() => {
+        setSliderValue(prev => {
+          const next = prev < 23 ? prev + 1 : 0
+          setCurrentHourIndex(next) // sync lên parent
+          return next              // cập nhật local ngay lập tức
+        })
+      }, 1000)
+    } else {
+      clearInterval(intervalRef.current)
+    }
+  
+    return () => clearInterval(intervalRef.current)
+  }, [isPlaying, setCurrentHourIndex])
+  
+
+  const handleInput = (e) => {
+    const value = Number(e.target.value)
+    setSliderValue(value) // move thumb & tooltip
+  }
+
+  const commitSliderValue = () => {
+    setCurrentHourIndex(sliderValue) // apply value to state after drag ends
+  }
+
   return (
     <div className='slider-container'>
-      <button id='play-pause-btn'>
-        <i className='fas fa-play'></i>
+      <button id='play-pause-btn' onClick={togglePlayPause}>
+        <i className={`fas fa-${isPlaying ? 'pause' : 'play'}`}></i>
       </button>
       <div className='slider'>
-        <input type='range' id='datetime-range' min='0' max='23' step='1' value='0' />
-        <span id='tooltip'></span>
+        <input
+          type='range'
+          id='datetime-range'
+          ref={sliderRef}
+          min='1'
+          max='24'
+          step='1'
+          value={sliderValue}
+          onInput={handleInput}
+          onMouseUp={commitSliderValue}
+          onTouchEnd={commitSliderValue}
+        />
+        <span id='tooltip' ref={tooltipRef}>
+          {sliderValue < 10 ? `0${sliderValue}:00` : `${sliderValue}:00`}
+        </span>
       </div>
     </div>
   )

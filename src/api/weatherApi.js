@@ -1,40 +1,44 @@
 import axiosInstance from './axiosInstance'
 
 const weatherApi = {
-  getRainByTimeRangeAll(startDateTime, endDateTime) {
+  getRainByAllTimeRange(startDateTime, endDateTime) {
     return axiosInstance.get(`/api/GetRain1h4WebByTimeRange_All/${startDateTime}/${endDateTime}`)
   },
 
-  getRainByRegionAndTimeRange(regId, startDateTime, endDateTime) {
+  getRainByTimeRange(regId, startDateTime, endDateTime) {
     return axiosInstance.get(`/api/GetRain1h4WebByTimeRange/${regId}/${startDateTime}/${endDateTime}`)
   },
 
-  getWaterLevelByTimeRange(startDateTime, endDateTime) {
+  getWaterLevelByAllTimeRange(startDateTime, endDateTime) {
     return axiosInstance.get(`/api/GetWL4WebByTimeRange_All/${startDateTime}/${endDateTime}`)
   },
 
-  getTemperatureByTimeRange(startDateTime, endDateTime) {
+  getTemperatureByAllTimeRange(startDateTime, endDateTime) {
     return axiosInstance.get(`/api/GetT2m4WebByTimeRange_All/${startDateTime}/${endDateTime}`)
   },
 
-  getWindByTimeRange(startDateTime, endDateTime) {
+  getWindByAllTimeRange(startDateTime, endDateTime) {
     return axiosInstance.get(`/api/GetWind10m4WebByTimeRange_All/${startDateTime}/${endDateTime}`)
   },
 
-  getHumidityByTimeRange(startDateTime, endDateTime) {
+  getHumidityByAllTimeRange(startDateTime, endDateTime) {
     return axiosInstance.get(`/api/GetRh2m4WebByTimeRange_All/${startDateTime}/${endDateTime}`)
   },
 
-  getPressureByTimeRange(startDateTime, endDateTime) {
+  getPressureByAllTimeRange(startDateTime, endDateTime) {
     return axiosInstance.get(`/api/GetPS4WebByTimeRange_All/${startDateTime}/${endDateTime}`)
   },
 
-  getAllRegionalCenters() {
+  getAllRegion() {
     return axiosInstance.get(`/api/GetAllRegCentre`)
   },
 
   getProvincesById(provinceId) {
     return axiosInstance.get(`/api/getAllProvince/${provinceId}`)
+  },
+
+  getTimeseriesRain1h(stationId, startDateTime, endDateTime) {
+    return axiosInstance.get(`/api/GetTimeseriesRain1h/${stationId}/${startDateTime}/${endDateTime}`)
   }
 }
 

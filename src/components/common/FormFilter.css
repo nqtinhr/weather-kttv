@@ -57,11 +57,6 @@
   color: #d9534f; /* Thêm hiệu ứng hover */
 }
 
-.select-box {
-  margin-bottom: 10px;
-}
-
-/* Khi form có lớp "hidden", ẩn hoàn toàn form */
 .filter-form.hidden {
   opacity: 0;
   visibility: hidden;

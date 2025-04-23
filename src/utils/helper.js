@@ -1,32 +1,19 @@
-export function formatDateToYAFormat(date) {
-  const pad = (n) => n.toString().padStart(2, '0')
-  return `${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}T${pad(date.getUTCHours())}00Z`
-}
+import { formatDateToYAFormat } from './format'
 
-export function getStartAndEndTime(startDateTime) {
+export function getStartAndEndTime(date) {
   const now = new Date()
-  const localNow = new Date(now.getTime() + 7 * 60 * 60 * 1000) // UTC+7
-const startOfDay = new Date(localNow);
-  startOfDay.setHours(0, 0, 0, 0);
+  const isToday =
+    date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth() && date.getDate() === now.getDate()
 
-  const endOfDay = new Date(localNow)
-  endOfDay.setHours(localNow.getHours() - 1, 0, 0, 0)
+  const start = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0)
+  const end = isToday
+    ? new Date(date.getFullYear(), date.getMonth(), date.getDate(), now.getHours(), 0)
+    : new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 0)
 
-  const timeRange = { startDateTime: '', endDateTime: '' }
-
-  if (startDateTime.toDateString() === localNow.toDateString()) {
-    timeRange.startDateTime = formatDateToYAFormat(startOfDay)
-    timeRange.endDateTime = formatDateToYAFormat(endOfDay)
-  } else {
-    const inputDate = new Date(startDateTime.getTime() + 7 * 60 * 60 * 1000)
-    const startOfInputDay = new Date(inputDate.setHours(0, 0, 0, 0))
-    const endOfInputDay = new Date(inputDate.setHours(23, 0, 0, 0))
-
-    timeRange.startDateTime = formatDateToYAFormat(startOfInputDay)
-    timeRange.endDateTime = formatDateToYAFormat(endOfInputDay)
+  return {
+    startDateTime: formatDateToYAFormat(start),
+    endDateTime: formatDateToYAFormat(end)
   }
-
-  return timeRange
 }
 
 export function roundDownToNearestTenMinutes(dateTime) {
@@ -47,4 +34,10 @@ export function roundDownToNearestHour(dateTime) {
   return new Date(
     Date.UTC(dateTime.getUTCFullYear(), dateTime.getUTCMonth(), dateTime.getUTCDate(), dateTime.getUTCHours(), 0, 0)
   )
+}
+
+export function getInitialHour() {
+  const now = new Date()
+  let hour = now.getHours() - 1
+  return hour >= 0 ? hour : 23 // nếu đang là 0h thì quay về 23h
 }

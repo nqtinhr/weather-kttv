@@ -1,5 +1,5 @@
 {
-  "name": "weather-profession",
+  "name": "weather-kttv",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,8 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.74.0",
+    "@tanstack/react-query-devtools": "^5.74.0",
     "axios": "^1.8.4",
     "esri-leaflet": "^3.0.14",
+    "highcharts": "^12.2.0",
+    "highcharts-react-official": "^3.2.1",
     "leaflet": "^1.9.4",
     "leaflet-draw": "^1.0.4",
     "leaflet-routing-machine": "^3.2.12",
@@ -19,8 +23,11 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-leaflet": "^5.0.0",
+    "react-router-dom": "6.3.0",
     "usehooks-ts": "^3.1.1",
-    "weather-profession": "file:"
+    "weather-kttv": "file:",
+    "weather-profession": "file:",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
