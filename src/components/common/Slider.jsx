@@ -1,5 +1,5 @@
-import './Slider.css'
 import { useEffect, useRef, useState } from 'react'
+import './Slider.css'
 
 export const Slider = ({ currentHourIndex, setCurrentHourIndex }) => {
   const [isPlaying, setIsPlaying] = useState(false)
@@ -9,7 +9,14 @@ export const Slider = ({ currentHourIndex, setCurrentHourIndex }) => {
   const sliderRef = useRef(null)
   const tooltipRef = useRef(null)
 
-  const togglePlayPause = () => setIsPlaying(prev => !prev)
+  // Update slider when the hour index changes
+  useEffect(() => {
+    setSliderValue(currentHourIndex)
+  }, [currentHourIndex])
+
+  const togglePlayPause = () => {
+    setIsPlaying((prev) => !prev)
+  }
 
   const updateTooltipPosition = (value) => {
     const slider = sliderRef.current
@@ -29,38 +36,36 @@ export const Slider = ({ currentHourIndex, setCurrentHourIndex }) => {
   }
 
   useEffect(() => {
-    setSliderValue(currentHourIndex)
-  }, [currentHourIndex])
-
-  useEffect(() => {
     updateTooltipPosition(sliderValue)
   }, [sliderValue])
 
-  useEffect(() => {
-    if (isPlaying) {
-      intervalRef.current = setInterval(() => {
-        setSliderValue(prev => {
-          const next = prev < 23 ? prev + 1 : 0
-          setCurrentHourIndex(next) // sync lên parent
-          return next              // cập nhật local ngay lập tức
-        })
-      }, 1000)
-    } else {
-      clearInterval(intervalRef.current)
-    }
-  
-    return () => clearInterval(intervalRef.current)
-  }, [isPlaying, setCurrentHourIndex])
-  
-
+  // Handle slider input change
   const handleInput = (e) => {
     const value = Number(e.target.value)
-    setSliderValue(value) // move thumb & tooltip
+    setSliderValue(value) // Move thumb & tooltip
   }
 
+  // Apply slider value when input is released (commit the value)
   const commitSliderValue = () => {
-    setCurrentHourIndex(sliderValue) // apply value to state after drag ends
+    setCurrentHourIndex(sliderValue)
   }
+
+  useEffect(() => {
+    // Automatically play/pause the slider
+    if (isPlaying) {
+      intervalRef.current = setInterval(() => {
+        setSliderValue((prev) => {
+          const next = prev < 23 ? prev + 1 : 0 // Loop back to 0
+          setCurrentHourIndex(next) // Sync with parent
+          return next // Update local value
+        })
+      }, 1000) // Update every second
+    } else {
+      clearInterval(intervalRef.current) // Clear interval when paused
+    }
+
+    return () => clearInterval(intervalRef.current)
+  }, [isPlaying, setCurrentHourIndex])
 
   return (
     <div className='slider-container'>
@@ -76,9 +81,9 @@ export const Slider = ({ currentHourIndex, setCurrentHourIndex }) => {
           max='24'
           step='1'
           value={sliderValue}
-          onInput={handleInput}
-          onMouseUp={commitSliderValue}
-          onTouchEnd={commitSliderValue}
+          onInput={handleInput} // Move thumb & tooltip on input
+          onMouseUp={commitSliderValue} // Commit value on mouse up
+          onTouchEnd={commitSliderValue} // Commit value on touch end
         />
         <span id='tooltip' ref={tooltipRef}>
           {sliderValue < 10 ? `0${sliderValue}:00` : `${sliderValue}:00`}

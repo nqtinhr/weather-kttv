@@ -32,12 +32,14 @@ export const FormFilter = () => {
         </div>
       )}
 
-      <div className={`filter-form ${isOpen ? 'active' : 'hidden'}`} ref={formRef}>
-        <div id='close-btn' onClick={toggleForm}>
-          <i className='fas fa-times'></i>
+      {isOpen && (
+        <div className={`filter-form ${isOpen ? 'active' : 'hidden'}`} ref={formRef}>
+          <div id='close-btn' onClick={toggleForm}>
+            <i className='fas fa-times'></i>
+          </div>
+          <RainForm />
         </div>
-        <RainForm />
-      </div>
+      )}
     </>
   )
 }

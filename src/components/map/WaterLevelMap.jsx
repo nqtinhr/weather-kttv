@@ -1,31 +1,34 @@
-import { useAllRain } from '@/hooks/useRainQuery'
+import { WATER_LEVEL } from '@/constants'
+import { useAllWaterLevel } from '@/hooks/useWaterLevelQuery'
 import { getRainColor } from '@/utils/classify'
-import { formatRainData } from '@/utils/format'
+import { formatWaterLevelData } from '@/utils/format'
 import { getStartAndEndTime } from '@/utils/helper'
 import { control, DomUtil } from 'leaflet'
-import { memo, useEffect, useState } from 'react'
-import { CircleMarker, Popup, useMap } from 'react-leaflet'
-import { ChartModal } from '../common/ChartModal'
+import { memo, useEffect, useMemo, useState } from 'react'
+import { useMap } from 'react-leaflet'
 
-export const RainMap = ({ currentHourIndex }) => {
+export const WaterLevelMap = ({ currentHourIndex }) => {
   const map = useMap()
   const [selectedStation, setSelectedStation] = useState(null)
 
   const { startDateTime, endDateTime } = getStartAndEndTime(new Date())
-  const { data } = useAllRain(startDateTime, endDateTime)
+  const { data } = useAllWaterLevel(startDateTime, endDateTime)
 
-  const [hourlyRainData, setHourlyRainData] = useState([])
+  const waterLevelData = useMemo(() => {
+    return data ? formatWaterLevelData(data) : []
+  }, [data])
+  console.log("🚀 ~ waterLevelData ~ waterLevelData:", waterLevelData)
 
-  useEffect(() => {
-    if (data) {
-      const formattedRainData = formatRainData(data)
-      const updatedRainData = formattedRainData.map((station) => {
-        const value = Object.entries(station.hourlyData)[currentHourIndex - 1]?.[1] || 0
-        return { ...station, rainValue: parseFloat(value) }
-      })
-      setHourlyRainData(updatedRainData)
-    }
-  }, [data, currentHourIndex])
+  const hourlyWLData = useMemo(() => {
+    return waterLevelData.map((station) => {
+      const value = station.hourlyData ? Object.entries(station.hourlyData)[currentHourIndex - 1]?.[1] : 0
+
+      return {
+        ...station,
+        rainValue: parseFloat(value) || 0
+      }
+    })
+  }, [waterLevelData, currentHourIndex])
 
   useEffect(() => {
     const legend = control({ position: 'topright' })
@@ -34,15 +37,21 @@ export const RainMap = ({ currentHourIndex }) => {
       const div = DomUtil.create('div', 'legend')
       div.innerHTML += '<h4>Chú giải</h4>'
       div.innerHTML += `
-        <div className="legend-gradient" style="background: linear-gradient(to right, #ff0000, #ff9900, #66cc66, #3399ff, #808080, #D3D3D3)">
-          <div class="legend-item" title="Mưa rất to (mưa > 100 mm)"></div>
-          <div class="legend-item" title="Mưa to (mưa từ 51 – 100 mm)"></div>
-          <div class="legend-item" title="Mưa vừa (mưa từ 16 – 50 mm)"></div>
-          <div class="legend-item" title="Mưa nhỏ (mưa < 16 mm)"></div>
-          <div class="legend-item" title="Không mưa"></div>
-          <div class="legend-item" title="Không có dữ liệu"></div>
+        <div class="legend-grid">
+          <div class="legend-item" title="Dưới BDD1 hoặc trạm tự động ">
+            <img src=${WATER_LEVEL.IMG_BLUEFLAG} alt="Dưới BDD1" height="20" width="20" />
+          </div>
+          <div class="legend-item" title="Trạm đạt mức BĐ1">
+            <img src=${WATER_LEVEL.IMG_BD1} alt="BĐ1" height="20" width="20" />
+          </div>
+          <div class="legend-item" title="Trạm đạt mức BĐ2 ">
+            <img src=${WATER_LEVEL.IMG_BD2} alt="BĐ2" height="25" width="25" />
+          </div>
+          <div class="legend-item" title="Trạm đạt mức BĐ3 ">
+            <img src=${WATER_LEVEL.IMG_BD3} alt="BĐ3" height="25" width="25" />
+          </div>
         </div>
-      `
+        `
       return div
     }
 
@@ -52,7 +61,7 @@ export const RainMap = ({ currentHourIndex }) => {
 
   return (
     <>
-      <MemoizedMarkerLayer data={hourlyRainData} onViewChart={setSelectedStation} />
+      {/* <MemoizedMarkerLayer data={hourlyWLData} onViewChart={setSelectedStation} /> */}
       {selectedStation && <ChartModal station={selectedStation} onClose={() => setSelectedStation(null)} />}
     </>
   )
@@ -66,7 +75,7 @@ export const MarkerLayer = ({ data, onViewChart }) => {
 
         return (
           <CircleMarker
-            key={`${station.stationId}-${station.lat}-${station.long}`}
+            key={station.stationId}
             center={[station.lat, station.long]}
             pathOptions={{
               radius: 4,

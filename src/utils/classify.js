@@ -8,3 +8,4 @@ export const getRainColor = (rainAmount) => {
 
   return { color: '#D3D3D3', fillColor: '#D3D3D3', fillOpacity: 0, weight: 0.25 }
 }
+

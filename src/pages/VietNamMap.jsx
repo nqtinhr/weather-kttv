@@ -9,6 +9,7 @@ import { CircleMarker, MapContainer, TileLayer, Tooltip, useMap } from 'react-le
 import './VietNamMap.css'
 import { Slider } from '@/components/common/Slider'
 import { getInitialHour } from '@/utils/helper'
+import { WaterLevelMap } from '@/components/map/WaterLevelMap'
 
 const MapSetup = () => {
   const map = useMap()
@@ -37,6 +38,7 @@ export const VietNamMap = () => {
         {/* <GeoJsonLoader json={PROVINCE} color='#ffffff' /> */}
 
         <RainMap currentHourIndex={currentHourIndex} />
+        {/* <WaterLevelMap currentHourIndex={currentHourIndex} /> */}
 
         <CircleMarker center={[10.335675, 112.740167]} pathOptions={{ fillColor: '#A3CCFF', radius: 0.01 }}>
           <Tooltip direction='bottom' permanent>
