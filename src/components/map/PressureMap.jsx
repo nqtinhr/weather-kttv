@@ -1,24 +1,23 @@
-import { useAllRain } from '@/hooks/useRainQuery'
-import { classifyRainColor } from '@/utils/classify'
-import { formatRainData } from '@/utils/format'
+import { useAllWind } from '@/hooks/useWindQuery'
+import { classifyPressureColor } from '@/utils/classify'
+import { formatPressureData } from '@/utils/format'
 import { getStartAndEndTime } from '@/utils/helper'
+import { useMapStore } from '@/zustand/store'
 import { control, DomUtil } from 'leaflet'
 import { memo, useEffect, useMemo, useState } from 'react'
-import { CircleMarker, Popup, useMap } from 'react-leaflet'
-import { ChartModal } from '../common/ChartModal'
-import { useMapStore } from '@/zustand/store'
+import { useMap } from 'react-leaflet'
 
-export const RainMap = () => {
-  // console.log('RainMap rendered')
-  const map = useMap()
+export const PressureMap = () => {
   const [selectedStation, setSelectedStation] = useState(null)
 
+  const map = useMap()
   const { startDateTime, endDateTime } = getStartAndEndTime(new Date())
-  const { data } = useAllRain(startDateTime, endDateTime)
+  const { data } = useAllWind(startDateTime, endDateTime)
 
-  const rainData = useMemo(() => {
-    return data ? formatRainData(data) : []
+  const pressureData = useMemo(() => {
+    return data ? formatPressureData(data) : []
   }, [data])
+  console.log('🚀 ~ pressureData ~ pressureData:', pressureData)
 
   useEffect(() => {
     const legend = control({ position: 'topright' })
@@ -26,15 +25,10 @@ export const RainMap = () => {
       const div = DomUtil.create('div', 'legend')
       div.innerHTML += '<h4>Chú giải</h4>'
       div.innerHTML += `
-        <div class="legend-gradient" style="background: linear-gradient(to right, #ff0000, #ff9900, #66cc66, #3399ff, #808080, #D3D3D3)">
-          <div class="legend-item" title="Mưa rất to (mưa > 100 mm)"></div>
-          <div class="legend-item" title="Mưa to (mưa từ 51 – 100 mm)"></div>
-          <div class="legend-item" title="Mưa vừa (mưa từ 16 – 50 mm)"></div>
-          <div class="legend-item" title="Mưa nhỏ (mưa < 16 mm)"></div>
-          <div class="legend-item" title="Không mưa"></div>
-          <div class="legend-item" title="Không có dữ liệu"></div>
-        </div>
-      `
+        <div class="legend-gradient" style="background: linear-gradient(to right, #6B8EFA, #F4A261);">
+            <div class="legend-item" title="Độ ẩm trên 1000"></div>
+            <div class="legend-item" title="Độ ẩm dưới 1000"></div>
+        </div>`;
       return div
     }
     legend.addTo(map)
@@ -43,33 +37,30 @@ export const RainMap = () => {
 
   return (
     <>
-      <MemoizedMarkerLayer rainData={rainData} onViewChart={setSelectedStation} />
+      <MemoizedMarkerLayer pressureData={pressureData} onViewChart={setSelectedStation} />
       {selectedStation && <ChartModal station={selectedStation} onClose={() => setSelectedStation(null)} />}
     </>
   )
 }
 
-export const MarkerLayer = ({ rainData, onViewChart }) => {
+export const MarkerLayer = ({ pressureData, onViewChart }) => {
   // console.log('MarkerLayer rendered')
   const currentHourIndex = useMapStore((state) => state.currentHourIndex)
 
   const updatedMarkers = useMemo(() => {
-    return rainData.reduce((acc, { hourlyData, ...station }) => {
-      const value = Object.entries(hourlyData)[currentHourIndex - 1]?.[1]
-      if (value != null) {
-        acc.push({
-          ...station,
-          rainValue: parseFloat(value)
-        })
+    return pressureData.map(({ hourlyData, ...station }) => {
+      const value = Object.entries(hourlyData)[currentHourIndex - 1]?.[1] || 0
+      return {
+        ...station,
+        value: parseFloat(value)
       }
-      return acc
-    }, [])
-  }, [rainData, currentHourIndex])
+    })
+  }, [pressureData, currentHourIndex])
 
   return (
     <>
       {updatedMarkers.map((station) => (
-        <RainMarker
+        <PressureMarker
           key={`${station.stationId}-${station.lat}-${station.long}`}
           station={station}
           onViewChart={onViewChart}
@@ -81,16 +72,15 @@ export const MarkerLayer = ({ rainData, onViewChart }) => {
 
 const MemoizedMarkerLayer = memo(MarkerLayer)
 
-const RainMarker = memo(
+const PressureMarker = memo(
   ({ station, onViewChart }) => {
-    // console.log(`Rendering marker for ${station.stationId} with rainValue ${station.rainValue}`)
-    const { color, fillColor, fillOpacity, weight } = classifyRainColor(station.rainValue)
+    const { color, fillColor } = classifyPressureColor(station.rainValue)
 
     return (
       <CircleMarker
         key={`${station.stationId}-${station.lat}-${station.long}`}
         center={[station.lat, station.long]}
-        pathOptions={{ radius: 4, color, fillColor, fillOpacity, weight }}
+        pathOptions={{ radius: 4, color, fillColor, fillOpacity: 1, weight: 1 }}
       >
         <Popup>
           <table className='table table-bordered table-striped table-sm'>
@@ -115,12 +105,12 @@ const RainMarker = memo(
                 <td>{station.address}</td>
               </tr>
               <tr>
-                <td className='text-nowrap fw-bold'>Dự án</td>
+                <td className='text-nowrap fw-bold'>Thời gian</td>
                 <td>{station.stationTypeId}</td>
               </tr>
               <tr>
-                <td className='text-nowrap fw-bold'>Tổng lượng mưa</td>
-                <td>{station.rainValue > 0 ? `${station.rainValue} mm` : 'Không có dữ liệu'}</td>
+                <td className='text-nowrap fw-bold'>Áp suất</td>
+                <td>{station.value}</td>
               </tr>
             </tbody>
           </table>
@@ -138,5 +128,5 @@ const RainMarker = memo(
       </CircleMarker>
     )
   },
-  (prevProps, nextProps) => prevProps.station.rainValue === nextProps.station.rainValue
+  (prevProps, nextProps) => prevProps.station.value === nextProps.station.value
 )

@@ -1,22 +1,21 @@
-import { WATER_LEVEL } from '@/constants'
-import { useAllWaterLevel } from '@/hooks/useWaterLevelQuery'
-import { classifyWaterLevelWarning } from '@/utils/classify'
-import { formatWaterLevelData } from '@/utils/format'
+import { useAllTemperature } from '@/hooks/useTemperatureQuery'
+import { classifyTemperature } from '@/utils/classify'
+import { formatTemperatureData } from '@/utils/format'
 import { getStartAndEndTime } from '@/utils/helper'
 import { useMapStore } from '@/zustand/store'
 import { control, DomUtil, icon } from 'leaflet'
 import { memo, useEffect, useMemo, useState } from 'react'
 import { Marker, Popup, useMap } from 'react-leaflet'
 
-export const WaterLevelMap = () => {
-  const map = useMap()
+export const TemperatureMap = () => {
   const [selectedStation, setSelectedStation] = useState(null)
+  const map = useMap()
 
   const { startDateTime, endDateTime } = getStartAndEndTime(new Date())
-  const { data } = useAllWaterLevel(startDateTime, endDateTime)
+  const { data } = useAllTemperature(startDateTime, endDateTime)
 
-  const waterLevelData = useMemo(() => {
-    return data ? formatWaterLevelData(data) : []
+  const temperatureData = useMemo(() => {
+    return data ? formatTemperatureData(data) : []
   }, [data])
 
   useEffect(() => {
@@ -26,21 +25,17 @@ export const WaterLevelMap = () => {
       const div = DomUtil.create('div', 'legend')
       div.innerHTML += '<h4>Chú giải</h4>'
       div.innerHTML += `
-        <div class="legend-grid">
-          <div class="legend-item" title="Dưới BDD1 hoặc trạm tự động ">
-            <img src=${WATER_LEVEL.IMG_BLUEFLAG} alt="Dưới BDD1" height="20" width="20" />
-          </div>
-          <div class="legend-item" title="Trạm đạt mức BĐ1">
-            <img src=${WATER_LEVEL.IMG_BD1} alt="BĐ1" height="20" width="20" />
-          </div>
-          <div class="legend-item" title="Trạm đạt mức BĐ2 ">
-            <img src=${WATER_LEVEL.IMG_BD2} alt="BĐ2" height="25" width="25" />
-          </div>
-          <div class="legend-item" title="Trạm đạt mức BĐ3 ">
-            <img src=${WATER_LEVEL.IMG_BD3} alt="BĐ3" height="25" width="25" />
-          </div>
-        </div>
-        `
+      <div class="legend-gradient" style="background: linear-gradient(to right, #228B22, #32CD32, #0033cc, #00868B, #FF4500, #C60000, #8B0000);">
+          <div class="legend-item" title="Nhiệt độ: <= 13°C"></div>
+          <div class="legend-item" title="Nhiệt độ từ: 14°C - 15°C"></div>
+          <div class="legend-item" title="Nhiệt độ từ: 16°C - 20°C"></div>
+          <div class="legend-item" title="Nhiệt độ từ: 21°C - 25°C"></div>
+          <div class="legend-item" title="Nhiệt độ từ: 26°C - 30°C"></div>
+          <div class="legend-item" title="Nhiệt độ từ: 31°C - 34°C"></div>
+          <div class="legend-item" title="Nhiệt độ từ: 35°C - 36°C"></div>
+          <div class="legend-item" title="Nhiệt độ từ: 37°C - 38°C"></div>
+          <div class="legend-item" title="Nhiệt độ: >= 39°C"></div>
+      </div>`
       return div
     }
 
@@ -50,20 +45,21 @@ export const WaterLevelMap = () => {
 
   return (
     <>
-      <MemoizedMarkerLayer waterLevelData={waterLevelData} onViewChart={setSelectedStation} />
+      <MemoizedMarkerLayer temperatureData={temperatureData} onViewChart={setSelectedStation} />
       {selectedStation && <ChartModal station={selectedStation} onClose={() => setSelectedStation(null)} />}
     </>
   )
 }
 
-export const MarkerLayer = ({ waterLevelData, onViewChart }) => {
+export const MarkerLayer = ({ temperatureData, onViewChart }) => {
   // console.log('MarkerLayer rendered')
   const currentHourIndex = useMapStore((state) => state.currentHourIndex)
 
   const updatedMarkers = useMemo(() => {
-    return waterLevelData
+    return temperatureData
       .map(({ hourlyData, ...station }) => {
-        const entry = Object.entries(hourlyData)[currentHourIndex - 1]
+        const hourEntries = Object.entries(hourlyData)
+        const entry = hourEntries[currentHourIndex - 1]
         if (!entry) return null
 
         const value = parseFloat(entry[1])
@@ -74,13 +70,13 @@ export const MarkerLayer = ({ waterLevelData, onViewChart }) => {
           value
         }
       })
-      .filter(Boolean) // loại bỏ null
-  }, [waterLevelData, currentHourIndex])
+      .filter(Boolean) // Loại bỏ các phần tử null
+  }, [temperatureData, currentHourIndex])
 
   return (
     <>
       {updatedMarkers.map((station) => (
-        <WaterLevelMarker
+        <TemperatureMarker
           key={`${station.stationId}-${station.lat}-${station.long}`}
           station={station}
           onViewChart={onViewChart}
@@ -92,10 +88,9 @@ export const MarkerLayer = ({ waterLevelData, onViewChart }) => {
 
 const MemoizedMarkerLayer = memo(MarkerLayer)
 
-const WaterLevelMarker = memo(
+const TemperatureMarker = memo(
   ({ station, onViewChart }) => {
-    const { iconUrl, iconSize } = classifyWaterLevelWarning(station.value, station.warnings)
-
+    const { iconUrl, iconSize } = classifyTemperature(station.value)
     return (
       <Marker
         key={`${station.stationId}-${station.lat}-${station.long}`}
@@ -129,29 +124,11 @@ const WaterLevelMarker = memo(
                 <td>{station.stationTypeId}</td>
               </tr>
               <tr>
-                <td className='text-nowrap fw-bold'>Báo động 1</td>
-                <td>{!station.warnings.level1 ? 'Không có dữ liệu' : station.warnings.level1}</td>
-              </tr>
-              <tr>
-                <td className='text-nowrap fw-bold'>Báo động 2</td>
-                <td>{!station.warnings.level2 ? 'Không có dữ liệu' : station.warnings.level2}</td>
-              </tr>
-              <tr>
-                <td className='text-nowrap fw-bold'>Báo động 3</td>
-                <td>{!station.warnings.level3 ? 'Không có dữ liệu' : station.warnings.level3}</td>
-              </tr>
-              <tr>
-                <td className='text-nowrap fw-bold'>Lũ lịch sử</td>
-                <td>
-                  {station.history.year === 0 && station.history.maxLevel === 0
-                    ? 'Không có dữ liệu'
-                    : `Năm ${station.history.year} đạt mức ${station.history.maxLevel}`}
+                <td class='text-nowrap'>
+                  <strong>Nhiệt độ:</strong>
                 </td>
+                <td>{!station.value ? 'Không có dữ liệu' : station.value + '°C'}</td>
               </tr>
-              {/* <tr>
-                <td className='text-nowrap fw-bold'>Giá trị</td>
-                <td>{isNaN(station.value) ? 'Không có dữ liệu' : station.value}</td>
-              </tr> */}
             </tbody>
           </table>
           <a

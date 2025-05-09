@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import './FormFilter.css'
-import RainForm from '../form/RainForm'
+import RainForm from './RainForm'
 
 export const FormFilter = () => {
   const [isOpen, setIsOpen] = useState(false)
