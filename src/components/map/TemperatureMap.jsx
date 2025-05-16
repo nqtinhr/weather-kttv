@@ -6,6 +6,7 @@ import { useMapStore } from '@/zustand/store'
 import { control, DomUtil, icon } from 'leaflet'
 import { memo, useEffect, useMemo, useState } from 'react'
 import { Marker, Popup, useMap } from 'react-leaflet'
+import { ChartModal } from '../chart/ChartModal'
 
 export const TemperatureMap = () => {
   const [selectedStation, setSelectedStation] = useState(null)
@@ -45,7 +46,13 @@ export const TemperatureMap = () => {
 
   return (
     <>
-      <MemoizedMarkerLayer temperatureData={temperatureData} onViewChart={setSelectedStation} />
+      <MemoizedMarkerLayer
+        temperatureData={temperatureData}
+        onViewChart={(stationId) => {
+          const fullStation = temperatureData.find((s) => s.stationId === stationId)
+          setSelectedStation(fullStation)
+        }}
+      />
       {selectedStation && <ChartModal station={selectedStation} onClose={() => setSelectedStation(null)} />}
     </>
   )
@@ -138,7 +145,7 @@ const TemperatureMarker = memo(
             data-bs-target={`#modal-${station.stationId}`}
             onClick={(e) => {
               e.preventDefault()
-              onViewChart(station)
+              onViewChart(station.stationId)
             }}
           >
             Xem biểu đồ

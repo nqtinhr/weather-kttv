@@ -16,6 +16,18 @@ export function getStartAndEndTime(date) {
   }
 }
 
+export function getPreviousOneDayRange(end) {
+  const endDate = new Date(end)
+  const startDate = new Date(endDate)
+  startDate.setUTCDate(startDate.getUTCDate() - 1)
+
+  return {
+    startDateTime: formatDateToYAFormat(startDate),
+    endDateTime: formatDateToYAFormat(endDate),
+  }
+}
+
+
 export function roundDownToNearestTenMinutes(dateTime) {
   const minutes = Math.floor(dateTime.getUTCMinutes() / 10) * 10
   return new Date(

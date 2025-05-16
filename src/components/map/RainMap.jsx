@@ -1,19 +1,18 @@
 import { useAllRain } from '@/hooks/useRainQuery'
 import { classifyRainColor } from '@/utils/classify'
 import { formatRainData } from '@/utils/format'
-import { getStartAndEndTime } from '@/utils/helper'
+import { useFilterStore, useMapStore } from '@/zustand/store'
 import { control, DomUtil } from 'leaflet'
 import { memo, useEffect, useMemo, useState } from 'react'
 import { CircleMarker, Popup, useMap } from 'react-leaflet'
-import { ChartModal } from '../common/ChartModal'
-import { useMapStore } from '@/zustand/store'
+import { ChartModal } from '../chart/ChartModal'
 
 export const RainMap = () => {
   // console.log('RainMap rendered')
   const map = useMap()
   const [selectedStation, setSelectedStation] = useState(null)
 
-  const { startDateTime, endDateTime } = getStartAndEndTime(new Date())
+  const { startDateTime, endDateTime } = useFilterStore()
   const { data } = useAllRain(startDateTime, endDateTime)
 
   const rainData = useMemo(() => {
@@ -43,7 +42,13 @@ export const RainMap = () => {
 
   return (
     <>
-      <MemoizedMarkerLayer rainData={rainData} onViewChart={setSelectedStation} />
+      <MemoizedMarkerLayer
+        rainData={rainData}
+        onViewChart={(stationId) => {
+          const fullStation = rainData.find((s) => s.stationId === stationId)
+          setSelectedStation(fullStation)
+        }}
+      />
       {selectedStation && <ChartModal station={selectedStation} onClose={() => setSelectedStation(null)} />}
     </>
   )
@@ -54,16 +59,13 @@ export const MarkerLayer = ({ rainData, onViewChart }) => {
   const currentHourIndex = useMapStore((state) => state.currentHourIndex)
 
   const updatedMarkers = useMemo(() => {
-    return rainData.reduce((acc, { hourlyData, ...station }) => {
-      const value = Object.entries(hourlyData)[currentHourIndex - 1]?.[1]
-      if (value != null) {
-        acc.push({
-          ...station,
-          rainValue: parseFloat(value)
-        })
+    return rainData.map(({ hourlyData, ...station }) => {
+      const value = Object.entries(hourlyData)[currentHourIndex - 1]?.[1] || 0
+      return {
+        ...station,
+        rainValue: parseFloat(value)
       }
-      return acc
-    }, [])
+    })
   }, [rainData, currentHourIndex])
 
   return (
@@ -128,7 +130,7 @@ const RainMarker = memo(
             href='#'
             onClick={(e) => {
               e.preventDefault()
-              onViewChart(station)
+              onViewChart(station.stationId)
             }}
             className='text-primary text-decoration-underline'
           >

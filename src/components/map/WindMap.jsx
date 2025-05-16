@@ -3,6 +3,9 @@ import { formatWindData } from '@/utils/format'
 import { getStartAndEndTime } from '@/utils/helper'
 import { useMapStore } from '@/zustand/store'
 import { memo, useMemo, useState } from 'react'
+import { Marker, Popup } from 'react-leaflet'
+import { ChartModal } from '../chart/ChartModal'
+import { createWindBarbIcon } from '@/utils/winbarb'
 
 export const WindMap = () => {
   const [selectedStation, setSelectedStation] = useState(null)
@@ -13,11 +16,16 @@ export const WindMap = () => {
   const windData = useMemo(() => {
     return data ? formatWindData(data) : []
   }, [data])
-  console.log('🚀 ~ windData ~ windData:', windData)
 
   return (
     <>
-      {/* <MemoizedMarkerLayer windData={windData} onViewChart={setSelectedStation} /> */}
+      <MemoizedMarkerLayer
+        windData={windData}
+        onViewChart={(stationId) => {
+          const fullStation = windData.find((s) => s.stationId === stationId)
+          setSelectedStation(fullStation)
+        }}
+      />
       {selectedStation && <ChartModal station={selectedStation} onClose={() => setSelectedStation(null)} />}
     </>
   )
@@ -28,13 +36,25 @@ export const MarkerLayer = ({ windData, onViewChart }) => {
   const currentHourIndex = useMapStore((state) => state.currentHourIndex)
 
   const updatedMarkers = useMemo(() => {
-    return windData.map(({ hourlyData, ...station }) => {
-      const value = Object.entries(hourlyData)[currentHourIndex - 1]?.[1] || 0
-      return {
-        ...station,
-        value: parseFloat(value)
-      }
-    })
+    return windData
+      .map(({ hourlyData, ...station }) => {
+        const entry = Object.entries(hourlyData)[currentHourIndex - 1]
+        if (!entry) return null
+
+        const rawValue = entry[1]
+        if (!rawValue || typeof rawValue !== 'string') return null
+
+        const [ddStr, ffStr] = rawValue.split(':')
+        const dd = parseFloat(ddStr)
+        const ff = parseFloat(ffStr)
+
+        return {
+          ...station,
+          dd,
+          ff
+        }
+      })
+      .filter(Boolean) // loại bỏ null
   }, [windData, currentHourIndex])
 
   return (
@@ -55,7 +75,11 @@ const MemoizedMarkerLayer = memo(MarkerLayer)
 const WindMarker = memo(
   ({ station, onViewChart }) => {
     return (
-      <Marker key={`${station.stationId}-${station.lat}-${station.long}`} position={[station.lat, station.long]}>
+      <Marker
+        key={`${station.stationId}-${station.lat}-${station.long}`}
+        position={[station.lat, station.long]}
+        icon={createWindBarbIcon({ deg: Math.round(station.dd ?? 0), speed: Math.round(station.ff ?? 0) * 1.94 })}
+      >
         <Popup>
           <table className='table table-bordered table-striped table-sm'>
             <thead>
@@ -82,21 +106,21 @@ const WindMarker = memo(
                 <td className='text-nowrap fw-bold'>Thời gian</td>
                 <td>{station.stationTypeId}</td>
               </tr>
-              {/* <tr>
-                <td class='text-nowrap fw-bold'>Hướng gió giật:</td>
-                <td>{}</td>
+              <tr>
+                <td className='text-nowrap fw-bold'>Hướng gió giật:</td>
+                <td>{station.dxDx}</td>
               </tr>
               <tr>
-                <td class='text-nowrap fw-bold'>Tốc độ gió giật:</td>
-                <td>{}</td>
-              </tr> */}
-              <tr>
-                <td class='text-nowrap fw-bold'>Tốc độ gió:</td>
+                <td className='text-nowrap fw-bold'>Tốc độ gió giật:</td>
                 <td>{station.fxFx}</td>
               </tr>
               <tr>
-                <td class='text-nowrap fw-bold'>Hướng gió:</td>
-                <td>{station.dxDx}</td>
+                <td className='text-nowrap fw-bold'>Tốc độ gió:</td>
+                <td>{station.ff + ' m/s'}</td>
+              </tr>
+              <tr>
+                <td className='text-nowrap fw-bold'>Hướng gió:</td>
+                <td>{station.dd + ' °'}</td>
               </tr>
             </tbody>
           </table>
@@ -107,7 +131,7 @@ const WindMarker = memo(
             data-bs-target={`#modal-${station.stationId}`}
             onClick={(e) => {
               e.preventDefault()
-              onViewChart(station)
+              onViewChart(station.stationId)
             }}
           >
             Xem biểu đồ

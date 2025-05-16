@@ -1,0 +1,7 @@
+export const RAIN = 'rain'
+export const WATER_LEVEL = 'water-level'
+export const TEMPERATURE = 'temperature'
+export const WIND = 'wind'
+export const HUMIDITY = 'humidity'
+export const PRESSURE = 'pressure'
+export const CLIMATE = 'climate'

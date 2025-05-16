@@ -1,18 +1,19 @@
-import { FormFilter } from '@/components/form/FormFilter'
 import { GeoJsonLoader } from '@/components/common/GeoJsonLoader'
 import { MapMenu } from '@/components/common/MapMenu'
 import { Slider } from '@/components/common/Slider'
+import { FormFilter } from '@/components/form/FormFilter'
 import { RainMap } from '@/components/map/RainMap'
+import { TemperatureMap } from '@/components/map/TemperatureMap'
+import { WaterLevelMap } from '@/components/map/WaterLevelMap'
+import { WindMap } from '@/components/map/WindMap'
 import COUNTRIES from '@/data/countries.json'
 import PROVINCE from '@/data/province.json'
 import { latLng, latLngBounds } from 'leaflet'
-import { useEffect } from 'react'
+import { memo, useEffect } from 'react'
 import { CircleMarker, MapContainer, TileLayer, Tooltip, useMap } from 'react-leaflet'
+import { useSearchParams } from 'react-router-dom'
 import './VietNamMap.css'
-import { WaterLevelMap } from '@/components/map/WaterLevelMap'
-import { WindMap } from '@/components/map/WindMap'
-import { TemperatureMap } from '@/components/map/TemperatureMap'
-import { PressureMap } from '@/components/map/PressureMap'
+import { RAIN, TEMPERATURE, WATER_LEVEL, WIND } from '@/constants/common'
 
 const MapSetup = () => {
   const map = useMap()
@@ -29,7 +30,7 @@ const MapSetup = () => {
 }
 
 export const VietNamMap = () => {
-  console.log('VietNamMap rendered')
+  console.log('VietNamMap rendered...')
   const mbUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
 
   return (
@@ -40,11 +41,7 @@ export const VietNamMap = () => {
         <GeoJsonLoader json={COUNTRIES} color='#ffffff' />
         <GeoJsonLoader json={PROVINCE} color='#ffffff' />
 
-        {/* <RainMap /> */}
-        {/* <WaterLevelMap /> */}
-        {/* <WindMap/> */}
-        {/* <TemperatureMap /> */}
-        {/* <PressureMap /> */}
+        <LayerSwitcher />
 
         <CircleMarker center={[10.335675, 112.740167]} pathOptions={{ fillColor: '#A3CCFF', radius: 0.01 }}>
           <Tooltip direction='bottom' permanent>
@@ -65,3 +62,21 @@ export const VietNamMap = () => {
     </div>
   )
 }
+
+const LayerSwitcher = memo(() => {
+  const [searchParams] = useSearchParams()
+  const type = searchParams.get('type')
+
+  switch (type) {
+    case RAIN:
+      return <RainMap />
+    case WATER_LEVEL:
+      return <WaterLevelMap />
+    case TEMPERATURE:
+      return <TemperatureMap />
+    case WIND:
+      return <WindMap />
+    default:
+      return null
+  }
+})

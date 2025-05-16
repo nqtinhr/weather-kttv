@@ -1,4 +1,4 @@
-import { WATER_LEVEL } from '@/constants'
+import { WATER_LEVEL_URL } from '@/constants/image'
 import { useAllWaterLevel } from '@/hooks/useWaterLevelQuery'
 import { classifyWaterLevelWarning } from '@/utils/classify'
 import { formatWaterLevelData } from '@/utils/format'
@@ -7,8 +7,10 @@ import { useMapStore } from '@/zustand/store'
 import { control, DomUtil, icon } from 'leaflet'
 import { memo, useEffect, useMemo, useState } from 'react'
 import { Marker, Popup, useMap } from 'react-leaflet'
+import { ChartModal } from '../chart/ChartModal'
 
 export const WaterLevelMap = () => {
+  console.log('WaterLevelMap rendered')
   const map = useMap()
   const [selectedStation, setSelectedStation] = useState(null)
 
@@ -28,16 +30,16 @@ export const WaterLevelMap = () => {
       div.innerHTML += `
         <div class="legend-grid">
           <div class="legend-item" title="Dưới BDD1 hoặc trạm tự động ">
-            <img src=${WATER_LEVEL.IMG_BLUEFLAG} alt="Dưới BDD1" height="20" width="20" />
+            <img src=${WATER_LEVEL_URL.IMG_BLUEFLAG} alt="Dưới BDD1" height="20" width="20" />
           </div>
           <div class="legend-item" title="Trạm đạt mức BĐ1">
-            <img src=${WATER_LEVEL.IMG_BD1} alt="BĐ1" height="20" width="20" />
+            <img src=${WATER_LEVEL_URL.IMG_BD1} alt="BĐ1" height="20" width="20" />
           </div>
           <div class="legend-item" title="Trạm đạt mức BĐ2 ">
-            <img src=${WATER_LEVEL.IMG_BD2} alt="BĐ2" height="25" width="25" />
+            <img src=${WATER_LEVEL_URL.IMG_BD2} alt="BĐ2" height="25" width="25" />
           </div>
           <div class="legend-item" title="Trạm đạt mức BĐ3 ">
-            <img src=${WATER_LEVEL.IMG_BD3} alt="BĐ3" height="25" width="25" />
+            <img src=${WATER_LEVEL_URL.IMG_BD3} alt="BĐ3" height="25" width="25" />
           </div>
         </div>
         `
@@ -50,7 +52,13 @@ export const WaterLevelMap = () => {
 
   return (
     <>
-      <MemoizedMarkerLayer waterLevelData={waterLevelData} onViewChart={setSelectedStation} />
+      <MemoizedMarkerLayer
+        waterLevelData={waterLevelData}
+        onViewChart={(stationId) => {
+          const fullStation = waterLevelData.find((s) => s.stationId === stationId)
+          setSelectedStation(fullStation)
+        }}
+      />
       {selectedStation && <ChartModal station={selectedStation} onClose={() => setSelectedStation(null)} />}
     </>
   )
@@ -148,10 +156,6 @@ const WaterLevelMarker = memo(
                     : `Năm ${station.history.year} đạt mức ${station.history.maxLevel}`}
                 </td>
               </tr>
-              {/* <tr>
-                <td className='text-nowrap fw-bold'>Giá trị</td>
-                <td>{isNaN(station.value) ? 'Không có dữ liệu' : station.value}</td>
-              </tr> */}
             </tbody>
           </table>
           <a
@@ -161,7 +165,7 @@ const WaterLevelMarker = memo(
             data-bs-target={`#modal-${station.stationId}`}
             onClick={(e) => {
               e.preventDefault()
-              onViewChart(station)
+              onViewChart(station.stationId)
             }}
           >
             Xem biểu đồ

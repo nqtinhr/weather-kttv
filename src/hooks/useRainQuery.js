@@ -1,5 +1,5 @@
 import weatherApi from '@/api/weatherApi'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 export const useAllRain = (startDateTime, endDateTime, options = {}) =>
   useQuery({
@@ -17,13 +17,32 @@ export const useRainByTimeRange = (regId, startDateTime, endDateTime, options = 
     ...options
   })
 
-export const useRainForm = () =>
-  useMutation({
+export const useRainForm = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
     mutationFn: async ({ region, startDateTime, endDateTime }) => {
-      if (region) {
-        return weatherApi.getRainByTimeRange(region, startDateTime, endDateTime)
-      } else {
-        return weatherApi.getRainByAllTimeRange(startDateTime, endDateTime)
-      }
+      const queryKey = region
+        ? ['rain-time-range', region, startDateTime, endDateTime]
+        : ['rain-all-time', startDateTime, endDateTime]
+
+      const cachedData = queryClient.getQueryData(queryKey)
+      if (cachedData) return cachedData
+
+      const data = region
+        ? await weatherApi.getRainByTimeRange(region, startDateTime, endDateTime)
+        : await weatherApi.getRainByAllTimeRange(startDateTime, endDateTime)
+
+      queryClient.setQueryData(queryKey, data)
+      return data
     }
+  })
+}
+
+export const useTimeseriesRain1h = (stationId, startDateTime, endDateTime, options = {}) =>
+  useQuery({
+    queryKey: ['timeseries-rain-1h', stationId, startDateTime, endDateTime],
+    queryFn: () => weatherApi.getTimeseriesRain1h(stationId, startDateTime, endDateTime),
+    enabled: !!stationId && !!startDateTime && !!endDateTime,
+    ...options
   })

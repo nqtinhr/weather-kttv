@@ -1,11 +1,21 @@
+import { useTimeseriesRain1h } from '@/hooks/useRainQuery'
+import { formatTimeseriesRain } from '@/utils/format'
+import { useFilterStore } from '@/zustand/store'
 import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
+import { useMemo } from 'react'
 
 export const RainChart = ({ station }) => {
-  const dataSeries = Object.entries(station.hourlyData).map(([hour, value]) => {
-    const dateStr = `2025-04-08T${hour.padStart(2, '0')}:00:00Z`
-    const timestamp = new Date(dateStr).getTime() + 7 * 3600 * 1000 // UTC+7
-    return [timestamp, parseFloat(value)]
+  const { startDateTime, endDateTime } = useFilterStore()
+  const { data } = useTimeseriesRain1h(station.stationId, startDateTime, endDateTime)
+
+  const timeseriesData = useMemo(() => {
+    return data ? formatTimeseriesRain(data) : []
+  }, [data])
+
+  const dataSeries = timeseriesData.map(({ datetime, value }) => {
+    const timestamp = new Date(datetime).getTime() + 7 * 60 * 60 * 1000
+    return [timestamp, value]
   })
 
   const options = {
@@ -28,10 +38,12 @@ export const RainChart = ({ station }) => {
         text: 'Lượng mưa (mm)'
       }
     },
-    series: [{
-      name: 'Lượng mưa',
-      data: dataSeries
-    }],
+    series: [
+      {
+        name: 'Lượng mưa',
+        data: dataSeries
+      }
+    ],
     plotOptions: {
       column: {
         pointPadding: 0.2,

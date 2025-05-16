@@ -39,7 +39,16 @@ const weatherApi = {
 
   getTimeseriesRain1h(stationId, startDateTime, endDateTime) {
     return axiosInstance.get(`/api/GetTimeseriesRain1h/${stationId}/${startDateTime}/${endDateTime}`)
-  }
+  },
+  getTimeseriesWaterLevel(stationId, startDateTime, endDateTime) {
+    return axiosInstance.get(`/api/GetTimeseriesWL/${stationId}/${startDateTime}/${endDateTime}`)
+  },
+  getTimeseriesTemperature(stationId, startDateTime, endDateTime) {
+    return axiosInstance.get(`/api/GetTimeseriesT2m/${stationId}/${startDateTime}/${endDateTime}`)
+  },
+  getTimeseriesWind10m(stationId, startDateTime, endDateTime) {
+    return axiosInstance.get(`/api/GetTimeseriesWind10m/${stationId}/${startDateTime}/${endDateTime}`)
+  },
 }
 
 export default weatherApi

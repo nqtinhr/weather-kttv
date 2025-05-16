@@ -1,4 +1,4 @@
-import { WATER_LEVEL } from '@/constants'
+import { WATER_LEVEL_URL } from '@/constants/image'
 
 export const classifyRainColor = (rainAmount) => {
   const amount = parseFloat(rainAmount)
@@ -18,18 +18,18 @@ export const classifyWaterLevelWarning = (value, warnings) => {
   const w3 = parseFloat(warnings.level3)
 
   if (isNaN(w1)) {
-    return { iconUrl: WATER_LEVEL.IMG_BLUEFLAG, iconSize: [20, 20] }
+    return { iconUrl: WATER_LEVEL_URL.IMG_BLUEFLAG, iconSize: [20, 20] }
   }
 
   switch (true) {
     case v < w1:
-      return { iconUrl: WATER_LEVEL.IMG_BLUEFLAG, iconSize: [20, 20] } // Dưới báo động 1
+      return { iconUrl: WATER_LEVEL_URL.IMG_BLUEFLAG, iconSize: [20, 20] } // Dưới báo động 1
     case v < w2 || isNaN(w2):
-      return { iconUrl: WATER_LEVEL.IMG_BD1, iconSize: [20, 20] } // Đạt BĐ1
+      return { iconUrl: WATER_LEVEL_URL.IMG_BD1, iconSize: [20, 20] } // Đạt BĐ1
     case v < w3 || isNaN(w3):
-      return { iconUrl: WATER_LEVEL.IMG_BD2, iconSize: [20, 20] } // Đạt BĐ2
+      return { iconUrl: WATER_LEVEL_URL.IMG_BD2, iconSize: [20, 20] } // Đạt BĐ2
     default:
-      return { iconUrl: WATER_LEVEL.IMG_BD3, iconSize: [30, 30] } // Đạt BĐ3
+      return { iconUrl: WATER_LEVEL_URL.IMG_BD3, iconSize: [30, 30] } // Đạt BĐ3
   }
 }
 

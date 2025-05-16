@@ -19,6 +19,16 @@ export const formatRainData = (data) => {
   })
 }
 
+export const formatTimeseriesRain = (data) => {
+  return data.map((item) => {
+    const { DatetimeValue, Value } = item
+    return {
+      datetime: DatetimeValue,
+      value: Value
+    }
+  })
+}
+
 export const formatWaterLevelData = (data) => {
   return data.map((item) => {
     const { Longitude, Latitude, StationID, StationName, StationTypeID, address, Warning1, Warning2, Warning3, HistoryHMaxYear, HistoryHMax, ...hourlyData } = item
@@ -44,6 +54,26 @@ export const formatWaterLevelData = (data) => {
   })
 }
 
+export const formatTimeseriesWaterLevel = (data) => {
+  return data.map((item) => {
+    const { Year, Month, Day, Hour, Minute, Value, Flag, WLWarning1, WLWarning2, WLWarning3 } = item
+    return {
+      year: Year,
+      month: Month,
+      day: Day,
+      hour: Hour,
+      minute: Minute,
+      value: Value,
+      flag: Flag,
+      warnings: {
+        level1: WLWarning1,
+        level2: WLWarning2,
+        level3: WLWarning3
+      }
+    }
+  })
+}
+
 export const formatWindData = (data) => {
   return data.map((item) => {
     const { Longitude, Latitude, StationID, StationName, StationTypeID, address, FxFx, DxDx, ...hourlyData } = item
@@ -62,6 +92,22 @@ export const formatWindData = (data) => {
   })
 }
 
+export const formatTimeseriesWind = (data) => {
+  return data.map((item) => {
+    const { year, Month, day, Hour, Minute, FF10m, DD10m, FxFx } = item
+    return {
+      year,
+      month: Month,
+      day,
+      hour: Hour,
+      minute: Minute,
+      ff10m: FF10m,
+      dd10m: DD10m,
+      fxFx: FxFx
+    }
+  })
+}
+
 export const formatTemperatureData = (data) => {
   return data.map((item) => {
     const { Longitude, Latitude, StationID, StationName, StationTypeID, address, ...hourlyData } = item
@@ -73,6 +119,20 @@ export const formatTemperatureData = (data) => {
       stationTypeId: StationTypeID,
       address,
       hourlyData
+    }
+  })
+}
+
+export const formatTimeseriesTemperature = (data) => {
+  return data.map((item) => {
+    const { Year, Month, Day, Hour, Minute, Value } = item
+    return {
+      year: Year,
+      month: Month,
+      day: Day,
+      hour: Hour,
+      minute: Minute,
+      value: Value
     }
   })
 }

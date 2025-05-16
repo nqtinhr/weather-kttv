@@ -33,3 +33,13 @@
 .sidebar-item .material-icons {
   margin-right: 15px;
 }
+
+.sidebar .link {
+  color: #444;
+  text-decoration: none;
+}
+
+.sidebar .link.active {
+  font-weight: bold;
+  color: #007bff !important;
+}
